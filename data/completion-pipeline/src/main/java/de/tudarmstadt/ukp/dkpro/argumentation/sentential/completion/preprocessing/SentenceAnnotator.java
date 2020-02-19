@@ -1,7 +1,6 @@
 package de.tudarmstadt.ukp.dkpro.argumentation.sentential.completion.preprocessing;
 
 import de.tudarmstadt.ukp.dkpro.argumentation.sentential.completion.tools.Hash;
-import de.tudarmstadt.ukp.dkpro.core.api.segmentation.SegmenterBase;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import org.apache.log4j.Logger;
@@ -13,7 +12,6 @@ import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
 import org.apache.uima.fit.descriptor.ConfigurationParameter;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.ResourceInitializationException;
 
 import javax.xml.soap.SAAJMetaFactory;
@@ -24,38 +22,56 @@ import java.util.Set;
 
 public class SentenceAnnotator extends JCasAnnotator_ImplBase {
 
+
     private static final Logger LOGGER = Logger.getLogger(SAAJMetaFactory.class);
 
-    public static final String PARAM_ANNOTATION_CLASS_NAME = "annotationClassName";
-    @ConfigurationParameter(name=PARAM_ANNOTATION_CLASS_NAME)
-    private String annotationClassName;
+    public static final String PARAM_ANNOTATION_PRO_CLASS_NAME = "annotationProClassName";
+    @ConfigurationParameter(name= PARAM_ANNOTATION_PRO_CLASS_NAME)
+    private String annotationProClassname;
 
-    public static final String PARAM_HASHES_NAME = "hashes";
-    @ConfigurationParameter(name=PARAM_HASHES_NAME)
-    private String hashes;
+    public static final String PARAM_ANNOTATION_CON_CLASS_NAME = "annotationConClassName";
+    @ConfigurationParameter(name= PARAM_ANNOTATION_CON_CLASS_NAME)
+    private String annotationConClassname;
 
-    private Set<String> hashSet;
+    public static final String PARAM_HASHES_PRO = "hashesPro";
+    @ConfigurationParameter(name= PARAM_HASHES_PRO)
+    private String hashesPro;
+
+    public static final String PARAM_HASHES_CONTRA = "hashesContra";
+    @ConfigurationParameter(name=PARAM_HASHES_CONTRA)
+    private String hashesContra;
+    private Set<String> hashSetPro;
+    private Set<String> hashSetContra;
 
     @Override
     public void initialize(UimaContext context) throws ResourceInitializationException {
         super.initialize(context);
-        hashSet = new HashSet<>(Arrays.asList(hashes.split("\t")));
+        hashSetPro = new HashSet<>(Arrays.asList(hashesPro.split("\t")));
+        hashSetContra = new HashSet<>(Arrays.asList(hashesContra.split("\t")));
     }
 
     @Override
     public void process(JCas jCas) throws AnalysisEngineProcessException {
 
-        Type annotationType = jCas.getTypeSystem().getType(annotationClassName);
+        Type annotationTypePro = jCas.getTypeSystem().getType(annotationProClassname);
+        Type annotationTypeCon = jCas.getTypeSystem().getType(annotationConClassname);
         Collection<Sentence> sentences = JCasUtil.select(jCas, Sentence.class);
         for (Sentence sentence: sentences) {
             String sentenceText= getTokenizedSentence(sentence);
             String hash = Hash.get(sentenceText);
 
-            if (hashSet.contains(hash)){
+            if (hashSetPro.contains(hash)){
 
                 int begin = sentence.getBegin();
                 int end = sentence.getEnd();
-                AnnotationFS annotation = jCas.getCas().createAnnotation(annotationType, begin, end);
+                AnnotationFS annotation = jCas.getCas().createAnnotation(annotationTypePro, begin, end);
+                jCas.getCas().addFsToIndexes(annotation);
+            }
+            if (hashSetContra.contains(hash)){
+
+                int begin = sentence.getBegin();
+                int end = sentence.getEnd();
+                AnnotationFS annotation = jCas.getCas().createAnnotation(annotationTypeCon, begin, end);
                 jCas.getCas().addFsToIndexes(annotation);
             }
         }

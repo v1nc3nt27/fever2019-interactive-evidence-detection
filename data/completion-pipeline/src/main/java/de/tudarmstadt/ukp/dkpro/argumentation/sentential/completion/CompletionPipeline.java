@@ -112,14 +112,15 @@ public class CompletionPipeline {
 			return false;
 		}
 
-		String hashes = String.join("\t", entries.stream().filter(entry -> "Argument_for".equals(entry.annotation)).map(entry -> entry.sentenceHash).collect(Collectors.toList()));
+		String hashesPro = String.join("\t", entries.stream().filter(entry -> "Argument_for".equals(entry.annotation)).map(entry -> entry.sentenceHash).collect(Collectors.toList()));
+		String hashesContra = String.join("\t", entries.stream().filter(entry -> "Argument_against".equals(entry.annotation)).map(entry -> entry.sentenceHash).collect(Collectors.toList()));
 		// complete entries
         String lastFolderName = filename.substring(0, filename.length()-4);
         File outputFolder = new File(String.format("%s/%s", output, lastFolderName));
        	if (!outputFolder.exists()) {
        		outputFolder.mkdir();
 		}
-		Preprocessing.extractSentences(content, lang, String.format("%s/%s/%s.tsv", output, lastFolderName, Hash.get(content)), hashes);
+		Preprocessing.extractSentences(content, lang, String.format("%s/%s/%s.tsv", output, lastFolderName, Hash.get(content)), hashesPro, hashesContra);
 		return true;
 	}
 

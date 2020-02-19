@@ -2,7 +2,12 @@
 <typeSystemDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <types>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.cst.Argument</name>
+            <name>de.tudarmstadt.ukp.cst.ProArgument</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.cst.ConArgument</name>
             <description/>
             <supertypeName>uima.tcas.Annotation</supertypeName>
         </typeDescription>
